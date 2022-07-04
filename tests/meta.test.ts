@@ -61,6 +61,17 @@ test('alternate', () => {
   expect(withoutAlternate).toBeNull()
 })
 
+test('body HTML', () => {
+  const withBodyHTML = parser.wikipedia.getBodyHTML()
+  const withoutBodyHTML = parser.blank.getBodyHTML()
+
+  expect(withBodyHTML).not.toBeNaN()
+  expect(typeof withBodyHTML).toEqual('string')
+
+  expect(withoutBodyHTML).not.toBeNaN()
+  expect(withoutBodyHTML.trim()).toEqual('')
+})
+
 test('canonical', () => {
   const withCanonical = parser.imdb.getCanonicalURL()
   const withoutCanonical = parser.blank.getCanonicalURL()
@@ -103,6 +114,28 @@ test('favicons', () => {
 
   expect(withoutFavicons).not.toBeNaN()
   expect(withoutFavicons).toBeNull()
+})
+
+test('head elements', () => {
+  const withHeadElements = parser.google.getHeadElements()
+  const withoutHeadElements = parser.blank.getHeadElements()
+
+  expect(withHeadElements).not.toBeNaN()
+  expect(withHeadElements).toBeInstanceOf(NodeList)
+
+  expect(withoutHeadElements).not.toBeNaN()
+  expect(withoutHeadElements).toBeInstanceOf(NodeList)
+})
+
+test('head HTML', () => {
+  const withHeadHTML = parser.google.getHeadHTML()
+  const withoutHeadHTML = parser.blank.getHeadHTML()
+
+  expect(withHeadHTML).not.toBeNaN()
+  expect(typeof withHeadHTML).toEqual('string')
+
+  expect(withoutHeadHTML).not.toBeNaN()
+  expect(withoutHeadHTML.trim()).toEqual('')
 })
 
 test('json+ld', () => {
@@ -161,13 +194,13 @@ test('viewport', () => {
   expect(withoutViewport).toBeNull()
 })
 
-test('uncollected', () => {
+test('unqueried', () => {
   parser.imdb.getViewport()
   parser.imdb.getDescription()
 
-  const uncollected = parser.imdb.getOther()
-  const collected = parser.imdb.getCollected()
-  const intersection = uncollected.filter(element => collected.includes(element))
+  const unqueried = parser.imdb.getUnqueried()
+  const queried = parser.imdb.getQueried()
+  const intersection = unqueried.filter(element => queried.includes(element))
 
   expect(intersection).toHaveLength(0)
 })

@@ -2,8 +2,12 @@ export class DocumentMeta {
   private readonly document: Document
   private readonly meta: HTMLMetaElement[] = []
   private readonly link: HTMLLinkElement[] = []
-  private readonly collected: Array<Element|HTMLMetaElement|HTMLLinkElement> = []
+  private readonly queried: Array<Element|HTMLMetaElement|HTMLLinkElement> = []
 
+  /**
+   * Extract metadata from HTML document objects
+   * @param document The document object to query against
+   */
   constructor (document: Document) {
     this.document = document
 
@@ -16,31 +20,70 @@ export class DocumentMeta {
     this.link = Array.from(link)
   }
 
-  public getCollected (): Array<Element|HTMLMetaElement|HTMLLinkElement> {
-    return this.collected
+  /**
+   * @returns Array of meta elements queried
+   */
+  public getQueried (): Array<Element|HTMLMetaElement|HTMLLinkElement> {
+    return this.queried
   }
 
-  public getOther (): Array<Element|HTMLMetaElement|HTMLLinkElement> {
-    return [...this.meta, ...this.link].filter(item => !this.collected.includes(item))
+  /**
+   * @returns Array of meta elements that have not been queried
+   */
+  public getUnqueried (): Array<Element|HTMLMetaElement|HTMLLinkElement> {
+    return [...this.meta, ...this.link].filter(item => !this.queried.includes(item))
   }
 
+  /**
+   * @returns Document interface used during instantiation
+   */
   public getDocument (): Document {
     return this.document
   }
 
+  /**
+   * @returns The full document HTML
+   */
   public getDocumentHTML (): string {
     return this.document.documentElement.innerHTML
   }
 
+  /**
+   * @returns All head metadata elements
+   */
+  public getHeadElements (): NodeList {
+    return this.document.querySelectorAll('head > *')
+  }
+
+  /**
+   * @returns The head element HTML markup
+   */
+  public getHeadHTML (): string {
+    return this.document.head.innerHTML
+  }
+
+  /**
+   * @returns The body element HTML markup
+   */
+  public getBodyHTML (): string {
+    return this.document.body.innerHTML
+  }
+
+  /**
+   * @returns The document.title property
+   */
   public getTitle (): string {
     return this.document.title
   }
 
+  /**
+   * @returns The description metadata content
+   */
   public getDescription (): string | null {
     const element = this.document.querySelector('meta[name="description"]')
 
     if (element instanceof HTMLMetaElement) {
-      this.collected.push(element)
+      this.queried.push(element)
 
       return element.content
     }
@@ -48,17 +91,23 @@ export class DocumentMeta {
     return null
   }
 
+  /**
+   * @returns Alternative relationship link elements
+   */
   public getAlternatives (): object | null {
     const elements = this.document.querySelectorAll('link[rel*="alternate"]')
 
     return this.getNodeListAttributes(elements)
   }
 
+  /**
+   * @returns Canonical link element
+   */
   public getCanonicalURL (): string | null {
     const element = this.document.querySelector('link[rel="canonical"]')
 
     if (element instanceof HTMLLinkElement) {
-      this.collected.push(element)
+      this.queried.push(element)
 
       return element.getAttribute('href')
     }
@@ -66,11 +115,14 @@ export class DocumentMeta {
     return null
   }
 
+  /**
+   * @returns Charset meta element attribute value
+   */
   public getCharset (): string | null {
     const element = this.document.querySelector('meta[charset]')
 
     if (element instanceof HTMLMetaElement) {
-      this.collected.push(element)
+      this.queried.push(element)
 
       return element.getAttribute('charset')
     }
@@ -78,18 +130,27 @@ export class DocumentMeta {
     return null
   }
 
+  /**
+   * @returns DCMI prefixed meta elements
+   */
   public getDublinCore (): object | null {
     const elements = this.document.querySelectorAll('meta[name^="dc." i]')
 
     return this.getNodeListAttributes(elements)
   }
 
+  /**
+   * @returns All icon link elements
+   */
   public getFavicons (): object | null {
     const elements = this.document.querySelectorAll('link[rel*="icon" i]')
 
     return this.getNodeListAttributes(elements)
   }
 
+  /**
+   * @returns Parsed JSON+LD script data
+   */
   public getJSONLD (): object | null {
     const elements = this.document.querySelectorAll('script[type="application/ld+json" i]')
     const jsonld: { [key: string]: any } = {}
@@ -105,17 +166,23 @@ export class DocumentMeta {
     return null
   }
 
+  /**
+   * @returns OpenGraph prefixed meta elements
+   */
   public getOpengraph (): object | null {
     const elements = this.document.querySelectorAll('meta[property^="og:" i]')
 
     return this.getNodeListAttributes(elements)
   }
 
+  /**
+   * @returns Robots meta directives
+   */
   public getRobots (): string | null {
     const element = this.document.querySelector('meta[name="robots" i]')
 
     if (element instanceof HTMLMetaElement) {
-      this.collected.push(element)
+      this.queried.push(element)
 
       return element.content
     }
@@ -123,17 +190,23 @@ export class DocumentMeta {
     return null
   }
 
+  /**
+   * @returns Twitter prefixed meta elements
+   */
   public getTwitter (): object | null {
     const elements = this.document.querySelectorAll('meta[property^="twitter:" i]')
 
     return this.getNodeListAttributes(elements)
   }
 
+  /**
+   * @returns Viewport meta element content
+   */
   public getViewport (): string | null {
     const element = this.document.querySelector('meta[name="viewport" i]')
 
     if (element instanceof HTMLMetaElement) {
-      this.collected.push(element)
+      this.queried.push(element)
 
       return element.content
     }
@@ -158,7 +231,7 @@ export class DocumentMeta {
         }
 
         listAttributes[index] = elementAttributes
-        this.collected.push(element)
+        this.queried.push(element)
       })
 
       return listAttributes

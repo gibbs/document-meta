@@ -17,6 +17,9 @@ interface MetaObject {
 }
 
 export class DocumentMetaObject extends DocumentMeta {
+  /**
+   * @returns An object of metadata
+   */
   public getData (): MetaObject {
     return {
       title: this.getTitle(),
@@ -31,7 +34,7 @@ export class DocumentMetaObject extends DocumentMeta {
       robots: this.getRobots(),
       twitter: this.getTwitter(),
       viewport: this.getViewport(),
-      other: this.getOther()
+      other: this.getUnqueried()
     }
   }
 }
