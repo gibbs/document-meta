@@ -1,0 +1,16 @@
+{
+  "env": {
+    "browser": true,
+    "jest/globals": true
+  },
+  "extends": [
+    "standard-with-typescript",
+    "plugin:jest/recommended"
+  ],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "plugins": [
+    "jest"
+  ]
+}

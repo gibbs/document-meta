@@ -1,0 +1,6 @@
+/*~
+/[Bb]ackup*/
+/node_modules/
+/.vscode/
+/coverage/
+/lib/

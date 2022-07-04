@@ -1,0 +1,42 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    branches:
+      - 'master'
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - name: Install Dependencies
+        run: npm install --force
+      - name: Lint
+        run: npm run lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - name: Install Dependencies
+        run: npm install --force
+      - name: Run tests
+        run: |
+          echo repo_token: ${{ secrets.COVERALLS_TOKEN }} > ./.coveralls.yml
+          npm run test:coverage
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
