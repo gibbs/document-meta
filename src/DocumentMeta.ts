@@ -320,6 +320,7 @@ export class DocumentMeta {
         }
 
         attributes[index] = elementAttributes
+        this.queried.push(element)
       })
 
       return attributes
