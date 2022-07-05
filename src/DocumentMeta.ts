@@ -104,6 +104,24 @@ export class DocumentMeta {
   }
 
   /**
+   * @returns Apple specific link elements
+   */
+  public getApple (): object | null {
+    const elements = this.document.querySelectorAll('[name^="apple-" i], [rel^="apple-"]')
+
+    return this.getNodeListAttributes(elements)
+  }
+
+  /**
+   * @returns App Link metadata
+   */
+  public getAppLink (): object | null {
+    const elements = this.document.querySelectorAll('meta[property^="al:" i]')
+
+    return this.getNodeListAttributes(elements)
+  }
+
+  /**
    * @returns Canonical link element
    */
   public getCanonicalURL (): string | null {
@@ -131,6 +149,42 @@ export class DocumentMeta {
     }
 
     return null
+  }
+
+  /**
+   * @returns Link dns-prefetch elements
+   */
+  public getDNSPrefetch (): object | null {
+    const elements = this.document.querySelectorAll('link[rel="dns-prefetch" i]')
+
+    return this.getNodeListAttributes(elements)
+  }
+
+  /**
+   * @returns Link preconnect elements
+   */
+  public getPreconnect (): object | null {
+    const elements = this.document.querySelectorAll('link[rel="preconnect" i]')
+
+    return this.getNodeListAttributes(elements)
+  }
+
+  /**
+   * @returns Link prefetching elements
+   */
+  public getPrefetch (): object | null {
+    const elements = this.document.querySelectorAll('link[rel="prefetch" i]')
+
+    return this.getNodeListAttributes(elements)
+  }
+
+  /**
+   * @returns Link preload elements
+   */
+  public getPreload (): object | null {
+    const elements = this.document.querySelectorAll('link[rel="preload" i]')
+
+    return this.getNodeListAttributes(elements)
   }
 
   /**
@@ -170,6 +224,21 @@ export class DocumentMeta {
   }
 
   /**
+   * @returns Web app manifest link element
+   */
+  public getManifest (): string | null {
+    const element = this.document.querySelector('link[rel="manifest" i]')
+
+    if (element instanceof HTMLLinkElement) {
+      this.queried.push(element)
+
+      return element.getAttribute('href')
+    }
+
+    return null
+  }
+
+  /**
    * @returns OpenGraph prefixed meta elements
    */
   public getOpengraph (): object | null {
@@ -191,6 +260,15 @@ export class DocumentMeta {
     }
 
     return null
+  }
+
+  /**
+   * @returns Link stylesheet elements
+   */
+  public getStylesheets (): object | null {
+    const elements = this.document.querySelectorAll('link[rel*="stylesheet" i]')
+
+    return this.getNodeListAttributes(elements)
   }
 
   /**
@@ -228,7 +306,7 @@ export class DocumentMeta {
   private getMixedElementAttributes (elements: any): object | null {
     const attributes: { [key: string]: any } = {}
 
-    if (elements.length) {
+    if (elements.length > 0) {
       elements.forEach((element: any, index: any) => {
         const elementAttributes: { [key: string]: { name: string, value: string } } = {}
 
