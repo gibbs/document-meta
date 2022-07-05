@@ -1,8 +1,9 @@
+type MetaElements = Array<Element|HTMLMetaElement|HTMLLinkElement>
+
 export class DocumentMeta {
   private readonly document: Document
-  private readonly meta: HTMLMetaElement[] = []
-  private readonly link: HTMLLinkElement[] = []
-  private readonly queried: Array<Element|HTMLMetaElement|HTMLLinkElement> = []
+  private readonly meta: MetaElements = []
+  private readonly queried: MetaElements = []
 
   /**
    * Extract metadata from HTML document objects
@@ -11,27 +12,29 @@ export class DocumentMeta {
   constructor (document: Document) {
     this.document = document
 
-    // Get all meta/link elements
-    const meta = document.querySelectorAll('meta')
-    const link = document.querySelectorAll('link')
-
-    // Set nodelist items
-    this.meta = Array.from(meta)
-    this.link = Array.from(link)
+    // Get all meta and link elements
+    this.meta = Array.from(document.querySelectorAll('meta, link'))
   }
 
   /**
    * @returns Array of meta elements queried
    */
-  public getQueried (): Array<Element|HTMLMetaElement|HTMLLinkElement> {
+  public getQueried (): MetaElements {
     return this.queried
   }
 
   /**
    * @returns Array of meta elements that have not been queried
    */
-  public getUnqueried (): Array<Element|HTMLMetaElement|HTMLLinkElement> {
-    return [...this.meta, ...this.link].filter(item => !this.queried.includes(item))
+  public getUnqueried (): MetaElements {
+    return this.meta.filter(item => !this.queried.includes(item))
+  }
+
+  /**
+   * @returns Object meta and link elements that have not been queried
+   */
+  public getOther (): object | null {
+    return this.getElementArrayAttributes(this.getUnqueried())
   }
 
   /**
@@ -170,7 +173,7 @@ export class DocumentMeta {
    * @returns OpenGraph prefixed meta elements
    */
   public getOpengraph (): object | null {
-    const elements = this.document.querySelectorAll('meta[property^="og:" i]')
+    const elements = this.document.querySelectorAll('meta[property^="og:" i], meta[name^="og:" i]')
 
     return this.getNodeListAttributes(elements)
   }
@@ -194,7 +197,7 @@ export class DocumentMeta {
    * @returns Twitter prefixed meta elements
    */
   public getTwitter (): object | null {
-    const elements = this.document.querySelectorAll('meta[property^="twitter:" i]')
+    const elements = this.document.querySelectorAll('meta[property^="twitter:" i], meta[name^="twitter:" i]')
 
     return this.getNodeListAttributes(elements)
   }
@@ -214,11 +217,19 @@ export class DocumentMeta {
     return null
   }
 
-  private getNodeListAttributes (items: NodeList): object | null {
-    const listAttributes: { [key: string]: any } = {}
+  private getElementArrayAttributes (elements: MetaElements): object | null {
+    return this.getMixedElementAttributes(elements)
+  }
 
-    if (items.length > 0) {
-      items.forEach((element: any, index) => {
+  private getNodeListAttributes (items: NodeList): object | null {
+    return this.getMixedElementAttributes(items)
+  }
+
+  private getMixedElementAttributes (elements: any): object | null {
+    const attributes: { [key: string]: any } = {}
+
+    if (elements.length) {
+      elements.forEach((element: any, index: any) => {
         const elementAttributes: { [key: string]: { name: string, value: string } } = {}
 
         for (const key of Object.keys(element.attributes)) {
@@ -230,11 +241,10 @@ export class DocumentMeta {
           }
         }
 
-        listAttributes[index] = elementAttributes
-        this.queried.push(element)
+        attributes[index] = elementAttributes
       })
 
-      return listAttributes
+      return attributes
     }
 
     return null

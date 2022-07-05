@@ -204,3 +204,22 @@ test('unqueried', () => {
 
   expect(intersection).toHaveLength(0)
 })
+
+test('unqueried attributes', () => {
+  parser.imdb.getViewport()
+  parser.imdb.getDescription()
+
+  const unqueriedAttributes = parser.imdb.getOther()
+
+  expect(unqueriedAttributes).not.toBeNaN()
+  expect(unqueriedAttributes).not.toBeNull()
+
+  // @ts-ignore
+  expect(Object.values(unqueriedAttributes).length).toBeGreaterThan(0)
+})
+
+test('no unqueried attributes', () => {
+  const unqueriedAttributes = parser.blank.getOther()
+
+  expect(unqueriedAttributes).toBeNull()
+})

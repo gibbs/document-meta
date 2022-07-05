@@ -34,7 +34,7 @@ export class DocumentMetaObject extends DocumentMeta {
       robots: this.getRobots(),
       twitter: this.getTwitter(),
       viewport: this.getViewport(),
-      other: this.getUnqueried()
+      other: this.getOther()
     }
   }
 }
