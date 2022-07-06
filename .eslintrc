@@ -4,13 +4,22 @@
     "jest/globals": true
   },
   "extends": [
-    "standard-with-typescript",
     "plugin:jest/recommended"
   ],
-  "parserOptions": {
-    "project": "./tsconfig.json"
-  },
   "plugins": [
     "jest"
+  ],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.d.ts"],
+      "extends": [
+        "plugin:@typescript-eslint/recommended",
+        // "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "standard-with-typescript"
+      ],
+      "parserOptions": {
+        "project": "./tsconfig.json"
+      }
+    }
   ]
 }

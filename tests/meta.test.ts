@@ -194,6 +194,14 @@ test('manifest', () => {
   expect(withoutManifest).toBeNull()
 })
 
+test('get data', () => {
+  const data = parser.instagram.getData()
+
+  expect(data).not.toBeNaN()
+  expect(data).not.toBeNull()
+})
+
+
 test('opengraph', () => {
   const withOpengraph = parser.imdb.getOpengraph()
   const withoutOpengraph = parser.blank.getOpengraph()

@@ -1,9 +1,7 @@
-type MetaElements = Array<Element|HTMLMetaElement|HTMLLinkElement>
-
 export class DocumentMeta {
   private readonly document: Document
-  private readonly meta: MetaElements = []
-  private readonly queried: MetaElements = []
+  private readonly meta: MetaElement = []
+  private readonly queried: MetaElement = []
 
   /**
    * Extract metadata from HTML document objects
@@ -19,21 +17,21 @@ export class DocumentMeta {
   /**
    * @returns Array of meta elements queried
    */
-  public getQueried (): MetaElements {
+  public getQueried (): MetaElement {
     return this.queried
   }
 
   /**
    * @returns Array of meta elements that have not been queried
    */
-  public getUnqueried (): MetaElements {
+  public getUnqueried (): MetaElement {
     return this.meta.filter(item => !this.queried.includes(item))
   }
 
   /**
    * @returns Object meta and link elements that have not been queried
    */
-  public getOther (): object | null {
+  public getOther (): Record<string, unknown> | null {
     return this.getElementArrayAttributes(this.getUnqueried())
   }
 
@@ -97,7 +95,7 @@ export class DocumentMeta {
   /**
    * @returns Alternative relationship link elements
    */
-  public getAlternatives (): object | null {
+  public getAlternatives (): Record<string, unknown> | null {
     const elements = this.document.querySelectorAll('link[rel*="alternate"]')
 
     return this.getNodeListAttributes(elements)
@@ -106,7 +104,7 @@ export class DocumentMeta {
   /**
    * @returns Apple specific link elements
    */
-  public getApple (): object | null {
+  public getApple (): Record<string, unknown> | null {
     const elements = this.document.querySelectorAll('[name^="apple-" i], [rel^="apple-"]')
 
     return this.getNodeListAttributes(elements)
@@ -115,7 +113,7 @@ export class DocumentMeta {
   /**
    * @returns App Link metadata
    */
-  public getAppLink (): object | null {
+  public getAppLink (): Record<string, unknown> | null {
     const elements = this.document.querySelectorAll('meta[property^="al:" i]')
 
     return this.getNodeListAttributes(elements)
@@ -154,7 +152,7 @@ export class DocumentMeta {
   /**
    * @returns Link dns-prefetch elements
    */
-  public getDNSPrefetch (): object | null {
+  public getDNSPrefetch (): Record<string, unknown> | null {
     const elements = this.document.querySelectorAll('link[rel="dns-prefetch" i]')
 
     return this.getNodeListAttributes(elements)
@@ -163,7 +161,7 @@ export class DocumentMeta {
   /**
    * @returns Link preconnect elements
    */
-  public getPreconnect (): object | null {
+  public getPreconnect (): Record<string, unknown> | null {
     const elements = this.document.querySelectorAll('link[rel="preconnect" i]')
 
     return this.getNodeListAttributes(elements)
@@ -172,7 +170,7 @@ export class DocumentMeta {
   /**
    * @returns Link prefetching elements
    */
-  public getPrefetch (): object | null {
+  public getPrefetch (): Record<string, unknown> | null {
     const elements = this.document.querySelectorAll('link[rel="prefetch" i]')
 
     return this.getNodeListAttributes(elements)
@@ -181,7 +179,7 @@ export class DocumentMeta {
   /**
    * @returns Link preload elements
    */
-  public getPreload (): object | null {
+  public getPreload (): Record<string, unknown> | null {
     const elements = this.document.querySelectorAll('link[rel="preload" i]')
 
     return this.getNodeListAttributes(elements)
@@ -190,7 +188,7 @@ export class DocumentMeta {
   /**
    * @returns DCMI prefixed meta elements
    */
-  public getDublinCore (): object | null {
+  public getDublinCore (): Record<string, unknown> | null {
     const elements = this.document.querySelectorAll('meta[name^="dc." i]')
 
     return this.getNodeListAttributes(elements)
@@ -199,7 +197,7 @@ export class DocumentMeta {
   /**
    * @returns All icon link elements
    */
-  public getFavicons (): object | null {
+  public getFavicons (): Record<string, unknown> | null {
     const elements = this.document.querySelectorAll('link[rel*="icon" i]')
 
     return this.getNodeListAttributes(elements)
@@ -208,9 +206,9 @@ export class DocumentMeta {
   /**
    * @returns Parsed JSON+LD script data
    */
-  public getJSONLD (): object | null {
+  public getJSONLD (): Record<string, unknown> | null {
     const elements = this.document.querySelectorAll('script[type="application/ld+json" i]')
-    const jsonld: { [key: string]: any } = {}
+    const jsonld: { [key: string]: Record<string, unknown> } = {}
 
     if (elements.length > 0) {
       elements.forEach((element, index) => {
@@ -239,9 +237,38 @@ export class DocumentMeta {
   }
 
   /**
+   * @returns An object of metadata
+   */
+  public getData (): MetaObject {
+    return {
+      title: this.getTitle(),
+      description: this.getDescription(),
+      apple: this.getApple(),
+      applink: this.getAppLink(),
+      charset: this.getCharset(),
+      canonical: this.getCanonicalURL(),
+      alternatives: this.getAlternatives(),
+      dc: this.getDublinCore(),
+      dnsPrefetch: this.getDNSPrefetch(),
+      favicons: this.getFavicons(),
+      jsonld: this.getJSONLD(),
+      manifest: this.getManifest(),
+      opengraph: this.getOpengraph(),
+      preconnect: this.getPreconnect(),
+      prefetch: this.getPrefetch(),
+      preload: this.getPreload(),
+      robots: this.getRobots(),
+      stylesheets: this.getStylesheets(),
+      twitter: this.getTwitter(),
+      viewport: this.getViewport(),
+      other: this.getOther()
+    }
+  }
+
+  /**
    * @returns OpenGraph prefixed meta elements
    */
-  public getOpengraph (): object | null {
+  public getOpengraph (): Record<string, unknown> | null {
     const elements = this.document.querySelectorAll('meta[property^="og:" i], meta[name^="og:" i]')
 
     return this.getNodeListAttributes(elements)
@@ -265,7 +292,7 @@ export class DocumentMeta {
   /**
    * @returns Link stylesheet elements
    */
-  public getStylesheets (): object | null {
+  public getStylesheets (): Record<string, unknown> | null {
     const elements = this.document.querySelectorAll('link[rel*="stylesheet" i]')
 
     return this.getNodeListAttributes(elements)
@@ -274,7 +301,7 @@ export class DocumentMeta {
   /**
    * @returns Twitter prefixed meta elements
    */
-  public getTwitter (): object | null {
+  public getTwitter (): Record<string, unknown> | null {
     const elements = this.document.querySelectorAll('meta[property^="twitter:" i], meta[name^="twitter:" i]')
 
     return this.getNodeListAttributes(elements)
@@ -295,16 +322,16 @@ export class DocumentMeta {
     return null
   }
 
-  private getElementArrayAttributes (elements: MetaElements): object | null {
+  private getElementArrayAttributes (elements: MetaElement): Record<string, unknown> | null {
     return this.getMixedElementAttributes(elements)
   }
 
-  private getNodeListAttributes (items: NodeList): object | null {
+  private getNodeListAttributes (items: NodeList): Record<string, unknown> | null {
     return this.getMixedElementAttributes(items)
   }
 
-  private getMixedElementAttributes (elements: any): object | null {
-    const attributes: { [key: string]: any } = {}
+  private getMixedElementAttributes (elements: any): Record<string, unknown> | null {
+    const attributes: { [key: string]: Record<string, unknown> } = {}
 
     if (elements.length > 0) {
       elements.forEach((element: any, index: any) => {

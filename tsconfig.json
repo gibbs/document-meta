@@ -10,10 +10,11 @@
     "module": "node16",
     "moduleResolution": "node",
     "noImplicitAny": true,
+    "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "target": "ES2019",
-    "typeRoots": ["node_modules/@types"]
+    "typeRoots": ["node_modules/@types", "./src/types/*.d.ts"]
   },
-  "include": ["./src/*.ts"]
+  "include": ["./src/**/*"]
 }
