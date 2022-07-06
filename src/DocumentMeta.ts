@@ -1,8 +1,7 @@
 export class DocumentMeta {
   private readonly document: Document
-  private readonly meta: HTMLMetaElement[] = []
-  private readonly link: HTMLLinkElement[] = []
-  private readonly queried: Array<Element|HTMLMetaElement|HTMLLinkElement> = []
+  private readonly meta: MetaElement = []
+  private readonly queried: MetaElement = []
 
   /**
    * Extract metadata from HTML document objects
@@ -11,27 +10,29 @@ export class DocumentMeta {
   constructor (document: Document) {
     this.document = document
 
-    // Get all meta/link elements
-    const meta = document.querySelectorAll('meta')
-    const link = document.querySelectorAll('link')
-
-    // Set nodelist items
-    this.meta = Array.from(meta)
-    this.link = Array.from(link)
+    // Get all meta and link elements
+    this.meta = Array.from(document.querySelectorAll('meta, link'))
   }
 
   /**
    * @returns Array of meta elements queried
    */
-  public getQueried (): Array<Element|HTMLMetaElement|HTMLLinkElement> {
+  public getQueried (): MetaElement {
     return this.queried
   }
 
   /**
    * @returns Array of meta elements that have not been queried
    */
-  public getUnqueried (): Array<Element|HTMLMetaElement|HTMLLinkElement> {
-    return [...this.meta, ...this.link].filter(item => !this.queried.includes(item))
+  public getUnqueried (): MetaElement {
+    return this.meta.filter(item => !this.queried.includes(item))
+  }
+
+  /**
+   * @returns Object meta and link elements that have not been queried
+   */
+  public getOther (): Record<string, unknown> | null {
+    return this.getElementArrayAttributes(this.getUnqueried())
   }
 
   /**
@@ -94,8 +95,26 @@ export class DocumentMeta {
   /**
    * @returns Alternative relationship link elements
    */
-  public getAlternatives (): object | null {
+  public getAlternatives (): Record<string, unknown> | null {
     const elements = this.document.querySelectorAll('link[rel*="alternate"]')
+
+    return this.getNodeListAttributes(elements)
+  }
+
+  /**
+   * @returns Apple specific link elements
+   */
+  public getApple (): Record<string, unknown> | null {
+    const elements = this.document.querySelectorAll('[name^="apple-" i], [rel^="apple-"]')
+
+    return this.getNodeListAttributes(elements)
+  }
+
+  /**
+   * @returns App Link metadata
+   */
+  public getAppLink (): Record<string, unknown> | null {
+    const elements = this.document.querySelectorAll('meta[property^="al:" i]')
 
     return this.getNodeListAttributes(elements)
   }
@@ -131,9 +150,45 @@ export class DocumentMeta {
   }
 
   /**
+   * @returns Link dns-prefetch elements
+   */
+  public getDNSPrefetch (): Record<string, unknown> | null {
+    const elements = this.document.querySelectorAll('link[rel="dns-prefetch" i]')
+
+    return this.getNodeListAttributes(elements)
+  }
+
+  /**
+   * @returns Link preconnect elements
+   */
+  public getPreconnect (): Record<string, unknown> | null {
+    const elements = this.document.querySelectorAll('link[rel="preconnect" i]')
+
+    return this.getNodeListAttributes(elements)
+  }
+
+  /**
+   * @returns Link prefetching elements
+   */
+  public getPrefetch (): Record<string, unknown> | null {
+    const elements = this.document.querySelectorAll('link[rel="prefetch" i]')
+
+    return this.getNodeListAttributes(elements)
+  }
+
+  /**
+   * @returns Link preload elements
+   */
+  public getPreload (): Record<string, unknown> | null {
+    const elements = this.document.querySelectorAll('link[rel="preload" i]')
+
+    return this.getNodeListAttributes(elements)
+  }
+
+  /**
    * @returns DCMI prefixed meta elements
    */
-  public getDublinCore (): object | null {
+  public getDublinCore (): Record<string, unknown> | null {
     const elements = this.document.querySelectorAll('meta[name^="dc." i]')
 
     return this.getNodeListAttributes(elements)
@@ -142,7 +197,7 @@ export class DocumentMeta {
   /**
    * @returns All icon link elements
    */
-  public getFavicons (): object | null {
+  public getFavicons (): Record<string, unknown> | null {
     const elements = this.document.querySelectorAll('link[rel*="icon" i]')
 
     return this.getNodeListAttributes(elements)
@@ -151,9 +206,9 @@ export class DocumentMeta {
   /**
    * @returns Parsed JSON+LD script data
    */
-  public getJSONLD (): object | null {
+  public getJSONLD (): Record<string, unknown> | null {
     const elements = this.document.querySelectorAll('script[type="application/ld+json" i]')
-    const jsonld: { [key: string]: any } = {}
+    const jsonld: { [key: string]: Record<string, unknown> } = {}
 
     if (elements.length > 0) {
       elements.forEach((element, index) => {
@@ -167,10 +222,54 @@ export class DocumentMeta {
   }
 
   /**
+   * @returns Web app manifest link element
+   */
+  public getManifest (): string | null {
+    const element = this.document.querySelector('link[rel="manifest" i]')
+
+    if (element instanceof HTMLLinkElement) {
+      this.queried.push(element)
+
+      return element.getAttribute('href')
+    }
+
+    return null
+  }
+
+  /**
+   * @returns An object of metadata
+   */
+  public getData (): MetaObject {
+    return {
+      title: this.getTitle(),
+      description: this.getDescription(),
+      apple: this.getApple(),
+      applink: this.getAppLink(),
+      charset: this.getCharset(),
+      canonical: this.getCanonicalURL(),
+      alternatives: this.getAlternatives(),
+      dc: this.getDublinCore(),
+      dnsPrefetch: this.getDNSPrefetch(),
+      favicons: this.getFavicons(),
+      jsonld: this.getJSONLD(),
+      manifest: this.getManifest(),
+      opengraph: this.getOpengraph(),
+      preconnect: this.getPreconnect(),
+      prefetch: this.getPrefetch(),
+      preload: this.getPreload(),
+      robots: this.getRobots(),
+      stylesheets: this.getStylesheets(),
+      twitter: this.getTwitter(),
+      viewport: this.getViewport(),
+      other: this.getOther()
+    }
+  }
+
+  /**
    * @returns OpenGraph prefixed meta elements
    */
-  public getOpengraph (): object | null {
-    const elements = this.document.querySelectorAll('meta[property^="og:" i]')
+  public getOpengraph (): Record<string, unknown> | null {
+    const elements = this.document.querySelectorAll('meta[property^="og:" i], meta[name^="og:" i]')
 
     return this.getNodeListAttributes(elements)
   }
@@ -191,10 +290,19 @@ export class DocumentMeta {
   }
 
   /**
+   * @returns Link stylesheet elements
+   */
+  public getStylesheets (): Record<string, unknown> | null {
+    const elements = this.document.querySelectorAll('link[rel*="stylesheet" i]')
+
+    return this.getNodeListAttributes(elements)
+  }
+
+  /**
    * @returns Twitter prefixed meta elements
    */
-  public getTwitter (): object | null {
-    const elements = this.document.querySelectorAll('meta[property^="twitter:" i]')
+  public getTwitter (): Record<string, unknown> | null {
+    const elements = this.document.querySelectorAll('meta[property^="twitter:" i], meta[name^="twitter:" i]')
 
     return this.getNodeListAttributes(elements)
   }
@@ -214,11 +322,19 @@ export class DocumentMeta {
     return null
   }
 
-  private getNodeListAttributes (items: NodeList): object | null {
-    const listAttributes: { [key: string]: any } = {}
+  private getElementArrayAttributes (elements: MetaElement): Record<string, unknown> | null {
+    return this.getMixedElementAttributes(elements)
+  }
 
-    if (items.length > 0) {
-      items.forEach((element: any, index) => {
+  private getNodeListAttributes (items: NodeList): Record<string, unknown> | null {
+    return this.getMixedElementAttributes(items)
+  }
+
+  private getMixedElementAttributes (elements: any): Record<string, unknown> | null {
+    const attributes: { [key: string]: Record<string, unknown> } = {}
+
+    if (elements.length > 0) {
+      elements.forEach((element: any, index: any) => {
         const elementAttributes: { [key: string]: { name: string, value: string } } = {}
 
         for (const key of Object.keys(element.attributes)) {
@@ -230,11 +346,11 @@ export class DocumentMeta {
           }
         }
 
-        listAttributes[index] = elementAttributes
+        attributes[index] = elementAttributes
         this.queried.push(element)
       })
 
-      return listAttributes
+      return attributes
     }
 
     return null

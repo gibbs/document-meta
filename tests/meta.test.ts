@@ -8,6 +8,7 @@ const util = new Util
 
 const parser = {
   blank: new DocumentMeta(util.createDocument('fixtures/blank.html')),
+  amazon: new DocumentMeta(util.createDocument('fixtures/amazon.co.uk.html')),
   google: new DocumentMeta(util.createDocument('fixtures/google.com.html')),
   imdb: new DocumentMeta(util.createDocument('fixtures/imdb.com.html')),
   instagram: new DocumentMeta(util.createDocument('fixtures/instagram.com.html')),
@@ -61,6 +62,28 @@ test('alternate', () => {
   expect(withoutAlternate).toBeNull()
 })
 
+test('apple', () => {
+  const withApple = parser.instagram.getApple()
+  const withoutApple = parser.blank.getApple()
+
+  expect(withApple).not.toBeNaN()
+  expect(withApple).toBeInstanceOf(Object)
+
+  expect(withoutApple).not.toBeNaN()
+  expect(withoutApple).toBeNull()
+})
+
+test('app links', () => {
+  const withAppLink = parser.instagram.getAppLink()
+  const withoutAppLink = parser.blank.getAppLink()
+
+  expect(withAppLink).not.toBeNaN()
+  expect(withAppLink).toBeInstanceOf(Object)
+
+  expect(withoutAppLink).not.toBeNaN()
+  expect(withoutAppLink).toBeNull()
+})
+
 test('body HTML', () => {
   const withBodyHTML = parser.wikipedia.getBodyHTML()
   const withoutBodyHTML = parser.blank.getBodyHTML()
@@ -92,6 +115,17 @@ test('charset', () => {
 
   expect(withoutCharset).not.toBeNaN()
   expect(withoutCharset).toBeNull()
+})
+
+test('dns-prefetch', () => {
+  const withDNSPrefetch = parser.amazon.getDNSPrefetch()
+  const withoutDNSPrefetch = parser.blank.getDNSPrefetch()
+
+  expect(withDNSPrefetch).not.toBeNaN()
+  expect(withDNSPrefetch).toBeInstanceOf(Object)
+
+  expect(withoutDNSPrefetch).not.toBeNaN()
+  expect(withoutDNSPrefetch).toBeNull()
 })
 
 test('dublin core', () => {
@@ -149,6 +183,25 @@ test('json+ld', () => {
   expect(withoutJSONLD).toBeNull()
 })
 
+test('manifest', () => {
+  const withManifest = parser.instagram.getManifest()
+  const withoutManifest = parser.blank.getManifest()
+
+  expect(withManifest).not.toBeNaN()
+  expect(withManifest).toEqual('/data/manifest.json')
+
+  expect(withoutManifest).not.toBeNaN()
+  expect(withoutManifest).toBeNull()
+})
+
+test('get data', () => {
+  const data = parser.instagram.getData()
+
+  expect(data).not.toBeNaN()
+  expect(data).not.toBeNull()
+})
+
+
 test('opengraph', () => {
   const withOpengraph = parser.imdb.getOpengraph()
   const withoutOpengraph = parser.blank.getOpengraph()
@@ -160,6 +213,39 @@ test('opengraph', () => {
   expect(withoutOpengraph).toBeNull()
 })
 
+test('preconnect', () => {
+  const withPreconnect = parser.wikipedia.getPreconnect()
+  const withoutPreconnect = parser.blank.getPreconnect()
+
+  expect(withPreconnect).not.toBeNaN()
+  expect(withPreconnect).toBeInstanceOf(Object)
+
+  expect(withoutPreconnect).not.toBeNaN()
+  expect(withoutPreconnect).toBeNull()
+})
+
+test('prefetch', () => {
+  const withPrefetch = parser.instagram.getPrefetch()
+  const withoutPrefetch = parser.blank.getPrefetch()
+
+  expect(withPrefetch).not.toBeNaN()
+  expect(withPrefetch).toBeInstanceOf(Object)
+
+  expect(withoutPrefetch).not.toBeNaN()
+  expect(withoutPrefetch).toBeNull()
+})
+
+test('preload', () => {
+  const withPreload = parser.instagram.getPreload()
+  const withoutPreload = parser.blank.getPreload()
+
+  expect(withPreload).not.toBeNaN()
+  expect(withPreload).toBeInstanceOf(Object)
+
+  expect(withoutPreload).not.toBeNaN()
+  expect(withoutPreload).toBeNull()
+})
+
 test('robots', () => {
   const withRobots = parser.instagram.getRobots()
   const withoutRobots = parser.blank.getRobots()
@@ -169,6 +255,17 @@ test('robots', () => {
 
   expect(withoutRobots).not.toBeNaN()
   expect(withoutRobots).toBeNull()
+})
+
+test('stylesheets', () => {
+  const withStylesheets = parser.instagram.getStylesheets()
+  const withoutStylesheets = parser.blank.getStylesheets()
+
+  expect(withStylesheets).not.toBeNaN()
+  expect(withStylesheets).toBeInstanceOf(Object)
+
+  expect(withoutStylesheets).not.toBeNaN()
+  expect(withoutStylesheets).toBeNull()
 })
 
 test('twitter', () => {
@@ -203,4 +300,23 @@ test('unqueried', () => {
   const intersection = unqueried.filter(element => queried.includes(element))
 
   expect(intersection).toHaveLength(0)
+})
+
+test('unqueried attributes', () => {
+  parser.imdb.getViewport()
+  parser.imdb.getDescription()
+
+  const unqueriedAttributes = parser.imdb.getOther()
+
+  expect(unqueriedAttributes).not.toBeNaN()
+  expect(unqueriedAttributes).not.toBeNull()
+
+  // @ts-ignore
+  expect(Object.values(unqueriedAttributes).length).toBeGreaterThan(0)
+})
+
+test('no unqueried attributes', () => {
+  const unqueriedAttributes = parser.blank.getOther()
+
+  expect(unqueriedAttributes).toBeNull()
 })
