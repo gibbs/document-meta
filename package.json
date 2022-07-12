@@ -1,5 +1,6 @@
 {
   "name": "document-meta",
+  "description": "ES module to simplify extracting meta data from browser document images",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "license": "MIT",
